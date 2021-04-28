@@ -2,11 +2,13 @@ const http = require('http')
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const { getTransactions, addTransaction, deleteTransaction } = require('./controllers/transactions');
+const { addUser, loginUser } = require('./controllers/users');
 
 dotenv.config({ path: './config/config.env' });
 connectDB();
 
 const server = http.createServer((req, res) => {
+    // user?
     if (req.url.replace(/\/$/, "") === "/api/transactions" && req.method === "GET") {
         getTransactions(req, res);
     } else if (req.url.replace(/\/$/, "") === "/api/transactions" && req.method === "POST") {
@@ -14,6 +16,10 @@ const server = http.createServer((req, res) => {
     } else if (req.url.match(/\/api\/transactions\/\w+/) && req.method === "DELETE") {
         const id = req.url.split('/')[3]
         deleteTransaction(req, res, id);
+    } else if (req.url.replace(/\/$/, "") === "/api/users" && req.method === "POST") {
+        addUser(req, res);
+    } else if (req.url.replace(/\/$/, "") === "/login" && req.method === "POST") {
+        loginUser(req, res);
     } else {
         res.writeHead(404, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ message: "route not found" }));

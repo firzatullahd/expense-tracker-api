@@ -9,8 +9,10 @@
     "dev": "nodemon index"
   },
   "dependencies": {
-    "mongoose": "^5.12.5",
-    "dotenv": "^8.2.0"
+    "bcrypt": "^5.0.1",
+    "dotenv": "^8.2.0",
+    "jsonwebtoken": "^0.2.0",
+    "mongoose": "^5.12.5"
   },
   "devDependencies": {
     "nodemon": "^2.0.7"
