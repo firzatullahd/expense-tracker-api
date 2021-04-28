@@ -1,0 +1,378 @@
+swagger: "2.0"
+info:
+  description: Expense Tracker API
+  version: "2.0"
+  title: Expense Tracker API
+  # put the contact info for your development or API team
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+
+# tags are used for organizing operations
+tags:
+  - name: Authenticated
+    description: Operations available only to authenticated users
+  - name: Public
+    description: Operations available to public
+paths:
+  /api/transactions:
+    get:
+      tags:
+        - Authenticated
+      summary: item list
+      operationId: list item
+      description: |
+        By passing in jwt/token in the header, you can search for
+        certain all transactions by certain user
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: x-auth-token
+          required: true
+          type: string
+          example: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJfaWQiOiI2MDg4ZGEwYjlhN2VjMDNiMTQ3YWI0ZDIiLCJpYXQiOjE2MTk2MjM0NjF9.xovKZefy-34ZgXjdfJ4bn86lbN8EE03_VOWF3t5xxNA"
+      responses:
+        200:
+          description: get all transactions according to user id obtained from jwt/token
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              count:
+                type: int
+                example: 1
+              data:
+                type: array
+                items:
+                  $ref: "#/definitions/Transaction"
+        401:
+          description: access denied. no token provided
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              error:
+                type: string
+                example: "access denied. no token provided"
+        400:
+          description: invalid token
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+            error:
+              type: string
+              example: "invalid token"
+        500:
+          description: server error
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              error:
+                type: string
+                example: "server error"
+    post:
+      tags:
+        - Authenticated
+      summary: adds a transaction
+      operationId: addTransaction
+      description: Adds a transaction to the system
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: x-auth-token
+          required: true
+          type: string
+          example: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJfaWQiOiI2MDg4ZGEwYjlhN2VjMDNiMTQ3YWI0ZDIiLCJpYXQiOjE2MTk2MjM0NjF9.xovKZefy-34ZgXjdfJ4bn86lbN8EE03_VOWF3t5xxNA"
+        - in: body
+          name: Transaction
+          description: transaction to add
+          schema:
+            $ref: "#/definitions/addTransaction"
+      responses:
+        201:
+          description: transaction saved
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                type: object
+                $ref: "#/definitions/Transaction"
+        401:
+          description: access denied. no token provided
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              error:
+                type: string
+                example: "access denied. no token provided"
+        400:
+          description: invalid token
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              error:
+                type: string
+                example: "invalid token"
+        500:
+          description: server error
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              error:
+                type: string
+                example: "server error"
+  /api/transactions/:id:
+    delete:
+      tags:
+        - Authenticated
+      summary: delete a transaction
+      operationId: deleteTransaction
+      description: delete a transaction from the system
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: x-auth-token
+          required: true
+          type: string
+          example: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJfaWQiOiI2MDg4ZGEwYjlhN2VjMDNiMTQ3YWI0ZDIiLCJpYXQiOjE2MTk2MjM0NjF9.xovKZefy-34ZgXjdfJ4bn86lbN8EE03_VOWF3t5xxNA"
+        - in: query
+          name: id
+          required: true
+          schema:
+            type: string
+            example: 60891403dde318146c5cba8e
+      responses:
+        200:
+          description: transaction with the given id has beed removed
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              message:
+                type: string
+                example: "transaction with id 60891403dde318146c5cba8e has been removed"
+        401:
+          description: access denied. no token provided
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              error:
+                type: string
+                example: "access denied. no token provided"
+        400:
+          description: invalid token
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              error:
+                type: string
+                example: "invalid token"
+        404:
+          description: no transaction found
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              error:
+                type: string
+                example: "no transaction found"
+        500:
+          description: server error
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              error:
+                type: string
+                example: "server error"
+  /register:
+    post:
+      tags:
+        - Public
+      summary: register user account
+      operationId: register user account
+      description: register user account to the system
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: register user
+          description: register user account
+          required: true
+          schema:
+            $ref: "#/definitions/User"
+      responses:
+        201:
+          description: account created
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                type: object
+                $ref: "#/definitions/User"
+        400:
+          description: username already exist
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              error:
+                type: string
+                example: "username already exist"
+        500:
+          description: server error
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              error:
+                type: string
+                example: "server error"
+  /login:
+    post:
+      tags:
+        - Public
+      summary: login user account
+      operationId: login user account
+      description: login user account to the system
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: user login
+          description: login user account
+          required: true
+          schema:
+            $ref: "#/definitions/User"
+      responses:
+        200:
+          description: login access granted
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                type: object
+                $ref: "#/definitions/UserLogin"
+        400:
+          description: incorrect username/password
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+            error:
+              type: string
+              example: "incorrect username/password"
+      500:
+        description: server error
+        schema:
+          type: object
+          properties:
+            success:
+              type: boolean
+              example: false
+            error:
+              type: string
+              example: "server error"
+definitions:
+  Transaction:
+    type: object
+    properties:
+      _id:
+        type: ObjectId
+        example: 60891403dde318146c5cba8e
+      text:
+        type: string
+        example: Payment
+      amount:
+        type: int
+        example: 10000
+      userId:
+        type: string
+        example: 60891403dde318146c5cba8e
+  addTransaction:
+    type: object
+    properties:
+      text:
+        type: string
+        example: Payment
+      amount:
+        type: int
+        example: 10000
+  User:
+    type: object
+    properties:
+      username:
+        type: string
+        example: "username1"
+      password:
+        type: string
+        example: "password123"
+  UserLogin:
+    type: object
+    properties:
+      data:
+        type: string
+        example: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJfaWQiOiI2MDg5MTQ0YmRkZTMxODE0NmM1Y2JhOTAiLCJpYXQiOjE2MTk1OTYzNjl9.6HrChFGbnyCEMBN-hG9gDjo2xHGl5wo5FxUbsyvQLnw"
+
+# Added by API Auto Mocking Plugin
+host: firzatullahd.herokuapp.com
+basePath: /
+schemes:
+  - http

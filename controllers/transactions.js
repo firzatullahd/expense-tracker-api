@@ -13,20 +13,19 @@ exports.getTransactions = async (req, res) => {
             res.writeHead(401, { 'Content-Type': 'application/json' });
             return res.end(JSON.stringify({
                 success: false,
-                data: "access denied. no token provided"
+                error: "access denied. no token provided"
             }));
 
         }
         jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+            userId = decoded._id;
             if (err) {
                 res.writeHead(400, { 'Content-Type': 'application/json' });
                 return res.end(JSON.stringify({
                     success: false,
-                    data: "invalid token"
+                    error: "invalid token"
                 }));
-
             }
-            userId = decoded._id;
         });
         const transactions = await Transaction.find({ userId });
 
@@ -56,18 +55,19 @@ exports.addTransaction = async (req, res) => {
             res.writeHead(401, { 'Content-Type': 'application/json' });
             return res.end(JSON.stringify({
                 success: false,
-                data: "access denied. no token provided"
+                error: "access denied. no token provided"
             }));
         }
         jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+            userId = decoded._id;
             if (err) {
                 res.writeHead(400, { 'Content-Type': 'application/json' });
                 return res.end(JSON.stringify({
                     success: false,
-                    data: "invalid token"
+                    error: "invalid token"
                 }));
             }
-            userId = decoded._id;
+
         });
         const body = await getPostData(req)
         const { text, amount } = JSON.parse(body)
@@ -111,19 +111,19 @@ exports.deleteTransaction = async (req, res, id) => {
             res.writeHead(401, { 'Content-Type': 'application/json' });
             return res.end(JSON.stringify({
                 success: false,
-                data: "access denied. no token provided"
+                error: "access denied. no token provided"
             }));
         }
         jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+            userId = decoded._id;
             if (err) {
                 res.writeHead(400, { 'Content-Type': 'application/json' });
                 return res.end(JSON.stringify({
                     success: false,
-                    data: "invalid token"
+                    error: "invalid token"
                 }));
             }
 
-            userId = decoded._id;
         });
         const transaction = await Transaction.findById(id);
         if (!transaction) {
@@ -144,7 +144,10 @@ exports.deleteTransaction = async (req, res, id) => {
 
         await transaction.remove(id);
         res.writeHead(200, { 'Content-Type': 'application/json' })
-        return res.end(JSON.stringify({ message: `Transaction with id ${id} has been removed` }))
+        return res.end(JSON.stringify({
+            success: true,
+            message: `Transaction with id ${id} has been removed`
+        }))
 
     } catch (err) {
         res.writeHead(500, { 'Content-Type': 'application/json' })

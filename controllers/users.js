@@ -5,7 +5,7 @@ const { getPostData } = require('../utils');
 // @desc    Add User
 // @route   POST /register
 // @access  Public
-exports.addUser = async (req, res) => {
+exports.registerUser = async (req, res) => {
     try {
         const body = await getPostData(req)
         let { username, password } = JSON.parse(body)

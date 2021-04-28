@@ -4,7 +4,7 @@ const winston = require('winston');
 const logging = require('./utils/logging');
 const connectDB = require('./config/db');
 const { getTransactions, addTransaction, deleteTransaction } = require('./controllers/transactions');
-const { addUser, loginUser } = require('./controllers/users');
+const { registerUser, loginUser } = require('./controllers/users');
 
 dotenv.config({ path: './config/config.env' });
 connectDB();
@@ -19,7 +19,7 @@ const server = http.createServer((req, res) => {
         const id = req.url.split('/')[3]
         deleteTransaction(req, res, id);
     } else if (req.url.replace(/\/$/, "") === "/register" && req.method === "POST") {
-        addUser(req, res);
+        registerUser(req, res);
     } else if (req.url.replace(/\/$/, "") === "/login" && req.method === "POST") {
         loginUser(req, res);
     } else {
@@ -27,6 +27,7 @@ const server = http.createServer((req, res) => {
         res.end(JSON.stringify({ message: "route not found" }));
     }
 });
+//swagger documentation & readme
 const PORT = process.env.PORT || 5000
 logging();
 if (!process.env.JWT_SECRET) throw new Error("FATAL ERROR: JWT_SECRET is not defined");
