@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const { getPostData } = require('../utils');
 
 // @desc    Add User
-// @route   POST /api/users
+// @route   POST /register
 // @access  Public
 exports.addUser = async (req, res) => {
     try {

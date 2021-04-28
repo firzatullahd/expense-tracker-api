@@ -11,32 +11,34 @@ exports.getTransactions = async (req, res) => {
         const token = await req.headers["x-auth-token"];
         if (!token) {
             res.writeHead(401, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({
+            return res.end(JSON.stringify({
                 success: false,
                 data: "access denied. no token provided"
             }));
+
         }
         jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
             if (err) {
                 res.writeHead(400, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({
-                    success: tfalse,
+                return res.end(JSON.stringify({
+                    success: false,
                     data: "invalid token"
                 }));
+
             }
             userId = decoded._id;
         });
         const transactions = await Transaction.find({ userId });
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
+        return res.end(JSON.stringify({
             success: true,
             count: transactions.length,
             data: transactions
         }));
     } catch (err) {
         res.writeHead(500, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
+        return res.end(JSON.stringify({
             success: false,
             error: 'Server Error'
         }));
@@ -52,7 +54,7 @@ exports.addTransaction = async (req, res) => {
         const token = await req.headers["x-auth-token"];
         if (!token) {
             res.writeHead(401, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({
+            return res.end(JSON.stringify({
                 success: false,
                 data: "access denied. no token provided"
             }));
@@ -60,8 +62,8 @@ exports.addTransaction = async (req, res) => {
         jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
             if (err) {
                 res.writeHead(400, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({
-                    success: tfalse,
+                return res.end(JSON.stringify({
+                    success: false,
                     data: "invalid token"
                 }));
             }
@@ -107,7 +109,7 @@ exports.deleteTransaction = async (req, res, id) => {
         const token = await req.headers["x-auth-token"];
         if (!token) {
             res.writeHead(401, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({
+            return res.end(JSON.stringify({
                 success: false,
                 data: "access denied. no token provided"
             }));
@@ -115,8 +117,8 @@ exports.deleteTransaction = async (req, res, id) => {
         jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
             if (err) {
                 res.writeHead(400, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({
-                    success: tfalse,
+                return res.end(JSON.stringify({
+                    success: false,
                     data: "invalid token"
                 }));
             }
