@@ -6,6 +6,7 @@ const connectDB = require('./config/db');
 const users = require('./routes/users');
 const transactions = require('./routes/transactions');
 const cors = require('cors');
+const compression = require('compression');
 
 dotenv.config({ path: './config/config.env' });
 connectDB();
@@ -13,6 +14,7 @@ const app = express();
 
 app.use(express.json());
 app.use(cors())
+app.use(compression())
 
 app.use('/api', users);
 app.use('/api', transactions);
