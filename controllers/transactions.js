@@ -1,46 +1,27 @@
 const Transaction = require('../models/Transaction');
-const { getPostData } = require('../utils');
-const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
+const winston = require('winston');
 
 // @desc    Get all transactions
 // @route   GET /api/transactions
 // @access  authenticated
 exports.getTransactions = async (req, res) => {
     try {
-        let userId;
-        const token = await req.headers["x-auth-token"];
-        if (!token) {
-            res.writeHead(401, { 'Content-Type': 'application/json' });
-            return res.end(JSON.stringify({
-                success: false,
-                error: "access denied. no token provided"
-            }));
-
-        }
-        jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-            userId = decoded._id;
-            if (err) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                return res.end(JSON.stringify({
-                    success: false,
-                    error: "invalid token"
-                }));
-            }
-        });
+        let userId = req.userId;
         const transactions = await Transaction.find({ userId });
 
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        return res.end(JSON.stringify({
+        return res.status(200).json({
             success: true,
             count: transactions.length,
             data: transactions
-        }));
+        })
+
     } catch (err) {
-        res.writeHead(500, { 'Content-Type': 'application/json' });
-        return res.end(JSON.stringify({
+        winston.error(err.message, err);
+        return res.status(500).json({
             success: false,
             error: 'Server Error'
-        }));
+        })
     }
 }
 
@@ -49,112 +30,61 @@ exports.getTransactions = async (req, res) => {
 // @access  authenticated
 exports.addTransaction = async (req, res) => {
     try {
-        let userId;
-        const token = await req.headers["x-auth-token"];
-        if (!token) {
-            res.writeHead(401, { 'Content-Type': 'application/json' });
-            return res.end(JSON.stringify({
-                success: false,
-                error: "access denied. no token provided"
-            }));
-        }
-        jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-            userId = decoded._id;
-            if (err) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                return res.end(JSON.stringify({
-                    success: false,
-                    error: "invalid token"
-                }));
-            }
-
-        });
-        const body = await getPostData(req)
-        const { text, amount } = JSON.parse(body)
-
+        let userId = req.userId;
+        const { text, amount } = req.body;
 
         const newTransaction = await Transaction.create({ text, amount, userId });
-
-        res.writeHead(201, { 'Content-Type': 'application/json' })
-        return res.end(JSON.stringify({
+        return res.status(201).json({
             success: true,
             data: newTransaction
-        }))
+        })
 
     } catch (err) {
-        if (err.name === 'ValidationError') {
-            const messages = Object.values(err.errors).map(val => val.message);
-
-            res.writeHead(400, { 'Content-Type': 'application/json' })
-            return res.end(JSON.stringify({
-                success: false,
-                error: messages
-            }))
-        } else {
-            es.writeHead(500, { 'Content-Type': 'application/json' })
-            return res.end(JSON.stringify({
-                success: false,
-                error: 'Server Error'
-            }))
-        }
+        winston.error(err.message, err);
+        return res.status(500).json({
+            success: false,
+            error: 'Server Error'
+        })
     }
 }
 
 // @desc    Delete transaction
 // @route   DELETE /api/transactions/:id
 // @access  authenticated
-exports.deleteTransaction = async (req, res, id) => {
+exports.deleteTransaction = async (req, res) => {
     try {
-        let userId;
-        const token = await req.headers["x-auth-token"];
-        if (!token) {
-            res.writeHead(401, { 'Content-Type': 'application/json' });
-            return res.end(JSON.stringify({
+        let userId = req.userId;
+        if (!mongoose.Types.ObjectId.isValid(req.params.id))
+            return res.status(404).json({
                 success: false,
-                error: "access denied. no token provided"
-            }));
-        }
-        jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-            userId = decoded._id;
-            if (err) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                return res.end(JSON.stringify({
-                    success: false,
-                    error: "invalid token"
-                }));
-            }
+                error: 'Invalid Transaction ID'
+            })
 
-        });
-        const transaction = await Transaction.findById(id);
+        const transaction = await Transaction.findById(req.params.id);
         if (!transaction) {
-            res.writeHead(404, { 'Content-Type': 'application/json' })
-            return res.end(JSON.stringify({
+            return res.status(404).json({
                 success: false,
                 error: 'No transaction found'
-            }))
-
+            })
         }
         if (userId !== transaction.userId) {
-            res.writeHead(401, { 'Content-Type': 'application/json' })
-            return res.end(JSON.stringify({
+            console.log(userId, transaction.userId)
+            return res.status(401).json({
                 success: false,
                 error: 'access denied.'
-            }))
+            })
         }
 
-        await transaction.remove(id);
-        res.writeHead(200, { 'Content-Type': 'application/json' })
-        return res.end(JSON.stringify({
+        await transaction.remove();
+        return res.status(200).json({
             success: true,
-            message: `Transaction with id ${id} has been removed`
-        }))
-
+            message: `Transaction with id ${req.params.id} has been removed`
+        })
     } catch (err) {
-        res.writeHead(500, { 'Content-Type': 'application/json' })
-        return res.end(JSON.stringify({
+        winston.error(err.message, err);
+        return res.status(500).json({
             success: false,
             error: 'Server Error'
-        }))
-
+        })
     }
 }

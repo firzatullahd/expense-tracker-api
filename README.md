@@ -1,5 +1,9 @@
 # Expense Tracker API
 
+[REST API](https://fir-expense-tracker-api.herokuapp.com/)
+<br>
+[Endpoints Documentation](https://firzatullahd.github.io/expense-tracker-api/)
+
 ## Overview
 
 Expense Tracker API, a very simple RESTful API built to support Expense Tracker App. Expense Tracker API was developed on Node JS, Mongoose, and MongoDB.
@@ -23,7 +27,7 @@ To get started, ensure that you have the following installed on your local machi
 - Clone repository or clone your own fork
 
   ```bash
-  git clone https://https://github.com/firzatullahd
+  git clone https://https://github.com/firzatullahd/expense-tracker-api.git
   ```
 
 - Make a duplicate of `config.env.example` and rename to `config.env`, then configure your credentials.
