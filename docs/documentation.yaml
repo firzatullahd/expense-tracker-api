@@ -15,12 +15,12 @@ tags:
   - name: Public
     description: Operations available to public
 paths:
-  /api/transactions:
+  /transactions:
     get:
       tags:
         - Authenticated
-      summary: item list
-      operationId: list item
+      summary: transaction list
+      operationId: list transaction
       description: |
         By passing in jwt/token in the header, you can search for
         certain all transactions by certain user
@@ -147,7 +147,7 @@ paths:
               error:
                 type: string
                 example: "server error"
-  /api/transactions/:id:
+  /transactions/:id:
     delete:
       tags:
         - Authenticated
@@ -373,6 +373,6 @@ definitions:
 
 # Added by API Auto Mocking Plugin
 host: firzatullahd.herokuapp.com
-basePath: /
+basePath: /api
 schemes:
   - http

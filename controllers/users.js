@@ -1,22 +1,20 @@
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
-const { getPostData } = require('../utils');
+const winston = require('winston');
 
 // @desc    Add User
-// @route   POST /register
+// @route   POST /api/register
 // @access  Public
 exports.registerUser = async (req, res) => {
     try {
-        const body = await getPostData(req)
-        let { username, password } = JSON.parse(body)
+        let { username, password } = req.body
 
         let user = await User.findOne({ username });
         if (user) {
-            res.writeHead(400, { 'Content-Type': 'application/json' })
-            return res.end(JSON.stringify({
+            return res.status(400).json({
                 success: false,
                 error: "username already exist"
-            }))
+            })
         }
         const salt = await bcrypt.genSalt(10);
         password = await bcrypt.hash(password, salt);
@@ -25,81 +23,53 @@ exports.registerUser = async (req, res) => {
             username, password
         });
 
-        res.writeHead(201, { 'Content-Type': 'application/json' })
-        return res.end(JSON.stringify({
+        return res.status(201).json({
             success: true,
             data: newUser
-        }))
-
+        })
     } catch (err) {
-        if (err.name === 'ValidationError') {
-            const messages = Object.values(err.errors).map(val => val.message);
-
-            res.writeHead(400, { 'Content-Type': 'application/json' })
-            return res.end(JSON.stringify({
-                success: false,
-                error: messages
-            }))
-        } else {
-            res.writeHead(500, { 'Content-Type': 'application/json' })
-            return res.end(JSON.stringify({
-                success: false,
-                error: 'Server Error'
-            }))
-        }
+        winston.error(err.message, err);
+        return res.status(500).json({
+            success: false,
+            error: 'Server Error'
+        })
     }
 }
 
 // @desc    Login User
-// @route   POST /login
+// @route   POST /api/login
 // @access  Public
 exports.loginUser = async (req, res) => {
     try {
-        const body = await getPostData(req)
-        let { username, password } = JSON.parse(body)
+        let { username, password } = req.body
 
         let user = await User.findOne({ username });
         if (!user) {
-            res.writeHead(400, { 'Content-Type': 'application/json' })
-            return res.end(JSON.stringify({
+            return res.status(400).json({
                 success: false,
                 error: "invalid username"
-            }))
+            })
         }
 
         const validPassword = await bcrypt.compare(password, user.password);
         if (!validPassword) {
-            res.writeHead(400, { 'Content-Type': 'application/json' })
-            return res.end(JSON.stringify({
+            return res.status(400).json({
                 success: false,
                 error: "invalid password"
-            }))
+            })
         }
 
         const token = user.generateAuthToken();
-
-        res.writeHead(200, { 'Content-Type': 'application/json' })
-        return res.end(JSON.stringify({
+        return res.status(200).json({
             success: true,
             data: token
-        }))
-
+        })
     } catch (err) {
-        if (err.name === 'ValidationError') {
-            const messages = Object.values(err.errors).map(val => val.message);
-
-            res.writeHead(400, { 'Content-Type': 'application/json' })
-            return res.end(JSON.stringify({
-                success: false,
-                error: messages
-            }))
-        } else {
-            res.writeHead(500, { 'Content-Type': 'application/json' })
-            return res.end(JSON.stringify({
-                success: false,
-                error: 'Server Error'
-            }))
-        }
+        winston.error(err.message, err);
+        return res.status(500).json({
+            success: false,
+            error: 'Server Error'
+        })
     }
 }
 
